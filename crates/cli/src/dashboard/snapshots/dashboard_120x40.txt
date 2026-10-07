@@ -1,0 +1,40 @@
+╭─ btc-miner ───────────────────────────────────────────────────────────────────── MAINNET · 14:23:05 UTC · up 2h 14m ─╮
+│  NODE  ● in sync · block 970,412 · tip 3 min old · 12 peers · Core 31.1.0 · 5.4 GB                                   │
+├─ MINING ─────────────────────────────────────────────────┬─ YOUR CHANCES ────────────────────────────────────────────┤
+│                                                          │                                                           │
+│   26.1 MH/s   (average 25.8 MH/s this session)           │   This session                                            │
+│   ▃▄▃▄▃▄▃▄▃▄▄▄▄▄▄▄▄▅██████████████████████               │      about 1 in 2.7 trillion of finding a block           │
+│   last 30 minutes                                        │                                                           │
+│                                                          │   On average                                              │
+│   power   ○ eco   ● balanced   ○ max                     │      one block every ≈ 678 million years at this speed    │
+│           6 of 8 cores · press + or - to change          │                                                           │
+│                                                          │   Best hash this session                                  │
+│   job     block 970,413 · 3,812 transactions             │      41 of the 78 zero bits a block needs                 │
+│           built by your node 52 seconds ago              │      each missing bit doubles it: 2³⁷ ≈ 137 billion× short│
+│                                                          │                                                           │
+├─ ALL TIME ───────────────────────────────────────────────┴───────────────────────────────────────────────────────────┤
+│   3.04T hashes · 12 sessions · best ever 45 zero bits · about 1 in 184 billion of a block so far                     │
+│   rewards to bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4 · spendable about 17 hours after a block is found            │
+├─ RECENT ─────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│   14:22:51  someone else found block 970,412 → new job, nothing lost                                                 │
+│   14:15:09  someone else found block 970,411 → new job, nothing lost                                                 │
+│   14:12:07  new personal best: 41 zero bits                                                                          │
+│   14:10:44  power set to balanced (6 of 8 cores)                                                                     │
+│   14:09:40  mining started                                                                                           │
+│   14:08:31  waiting for the node: 4 blocks behind its own headers                                                    │
+│   14:08:02  btc-miner 0.1.0 started                                                                                  │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+╰─ q quit · p pause · +/- power · ? what am I looking at ──────────────────────────────────────────────────────────────╯

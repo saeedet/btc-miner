@@ -1,0 +1,24 @@
+╭─ btc-miner ──────────────────────────────────────────────────────── MAINNET ─╮
+│                                                                              │
+│                                                                              │
+│                           ★  YOU FOUND A BLOCK  ★                            │
+│                                                                              │
+│             block 970,413 · 14:23:05 UTC · accepted by your node             │
+│                                                                              │
+│          reward      3.1587 BTC  →  bc1qw508…f3t4                            │
+│          spendable   after block 970,513 (about 17 hours from now)           │
+│                                                                              │
+│          The chance of that this session was about 1 in 2.7 trillion.        │
+│                                                                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│   Make sure the wallet that owns this address is backed up.                  │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+╰─ enter back to mining ───────────────────────────────────────────────────────╯
