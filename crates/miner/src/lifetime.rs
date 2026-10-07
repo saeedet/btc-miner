@@ -125,11 +125,31 @@ fn now() -> u64 {
         .map_or(0, |d| d.as_secs())
 }
 
-/// Where the totals live by default.
+/// Where the totals live by default: `~/.btc-miner/lifetime.json`.
 pub fn default_path() -> PathBuf {
     std::env::var("HOME")
-        .map(|home| PathBuf::from(home).join(".solo-mac-miner").join("lifetime.json"))
+        .map(|home| state_dir_in(Path::new(&home)).join("lifetime.json"))
         .unwrap_or_else(|_| PathBuf::from("lifetime.json"))
+}
+
+/// The state directory under `home`, migrating the pre-rename one if needed.
+///
+/// This project was called mac-solo-miner and kept its state in
+/// `~/.solo-mac-miner`. The first time the new directory is looked for and the
+/// old one is found instead, it is moved, so lifetime totals and the payout
+/// address carry over rather than silently starting from zero.
+///
+/// Best effort: if the move fails the miner starts with fresh totals, which
+/// costs a number rather than anything that matters.
+pub fn state_dir_in(home: &Path) -> PathBuf {
+    let dir = home.join(".btc-miner");
+    let legacy = home.join(".solo-mac-miner");
+
+    if !dir.exists() && legacy.is_dir() {
+        let _ = std::fs::rename(&legacy, &dir);
+    }
+
+    dir
 }
 
 #[cfg(test)]
@@ -194,6 +214,38 @@ mod tests {
         assert_eq!(lifetime.total_hashes, 0);
 
         let _ = std::fs::remove_file(&path);
+    }
+
+    /// State from before the rename must follow the user, not be orphaned.
+    #[test]
+    fn the_pre_rename_directory_is_migrated() {
+        let home = std::env::temp_dir().join(format!("btc-miner-migrate-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&home);
+        std::fs::create_dir_all(home.join(".solo-mac-miner")).expect("creates");
+        std::fs::write(home.join(".solo-mac-miner/lifetime.json"), "{}").expect("writes");
+
+        let dir = state_dir_in(&home);
+
+        assert_eq!(dir, home.join(".btc-miner"));
+        assert!(dir.join("lifetime.json").exists(), "contents moved across");
+        assert!(!home.join(".solo-mac-miner").exists(), "old directory gone");
+
+        let _ = std::fs::remove_dir_all(&home);
+    }
+
+    /// An existing new directory wins; the old one is left untouched.
+    #[test]
+    fn an_existing_state_directory_is_never_overwritten() {
+        let home = std::env::temp_dir().join(format!("btc-miner-keep-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&home);
+        std::fs::create_dir_all(home.join(".btc-miner")).expect("creates");
+        std::fs::create_dir_all(home.join(".solo-mac-miner")).expect("creates");
+
+        state_dir_in(&home);
+
+        assert!(home.join(".solo-mac-miner").exists(), "nothing moved over existing state");
+
+        let _ = std::fs::remove_dir_all(&home);
     }
 
     /// The odds are linear in work done — the whole point of tracking a total.

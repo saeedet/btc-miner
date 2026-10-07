@@ -1,7 +1,7 @@
 //! A solo mining pool: bitcoind on one side, Stratum V1 on the other.
 //!
 //! ```text
-//! solo-pool [--network regtest] [--listen 127.0.0.1:3333] [--address bc1...]
+//! pool [--network regtest] [--listen 127.0.0.1:3333] [--address bc1...]
 //! ```
 //!
 //! # What a solo pool is for
@@ -400,7 +400,7 @@ impl Options {
                 "--address" => address = Some(value()?),
                 "--help" | "-h" => {
                     println!(
-                        "solo-pool [--network regtest|testnet4|mainnet] \
+                        "pool [--network regtest|testnet4|mainnet] \
                          [--listen ADDR] [--address ADDR]"
                     );
                     std::process::exit(0);

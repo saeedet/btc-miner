@@ -76,7 +76,7 @@ pub fn mine(
         payout_script.to_vec(),
     )
     .extranonce(extranonce.to_le_bytes().to_vec())
-    .tag(b"solo-mac-miner".to_vec())
+    .tag(b"btc-miner".to_vec())
     .witness_commitment(commitment_script)
     .build()?;
 

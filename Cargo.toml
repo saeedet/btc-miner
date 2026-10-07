@@ -1,4 +1,4 @@
-# Workspace root for solo-mac-miner.
+# Workspace root for btc-miner.
 #
 # This is a "virtual manifest": it defines no package of its own, it only
 # groups the crates under crates/ so they share one target/ directory, one

@@ -1,7 +1,7 @@
 //! A Stratum V1 mining client.
 //!
 //! ```text
-//! mac-miner [--pool 127.0.0.1:3333] [--worker mac]
+//! miner [--pool 127.0.0.1:3333] [--worker mac]
 //! ```
 //!
 //! Connects to a pool, subscribes, and hashes whatever it is sent. It knows
@@ -57,7 +57,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     connection.outbound.send(serde_json::to_string(&Request::call(
         1,
         method::SUBSCRIBE,
-        json!(["mac-miner/0.1.0"]),
+        json!(["btc-miner/0.1.0"]),
     ))?)?;
 
     let subscribe_reply = wait_for_response(&connection, 1)?;
@@ -375,7 +375,7 @@ fn parse_args() -> Result<Options, Box<dyn std::error::Error>> {
             }
             "--help" | "-h" => {
                 println!(
-                    "mac-miner [--pool ADDR] [--worker NAME] [--threads N|half|max]\n\
+                    "miner [--pool ADDR] [--worker NAME] [--threads N|half|max]\n\
                      \n\
                      --threads defaults to {default_threads} of {cores} cores, leaving two free so\n\
                      the machine stays usable. `half` is {} and `max` is {cores}.",

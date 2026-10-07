@@ -1,4 +1,6 @@
-# solo-mac-miner
+# btc-miner
+
+*Formerly `mac-solo-miner`. Old links redirect here.*
 
 A solo Bitcoin miner built from scratch in Rust, running against a local pruned
 Bitcoin Core node on an Apple Silicon Mac.
@@ -42,7 +44,7 @@ and running it for two hours now and then is a perfectly coherent way to use it.
 ## Architecture
 
 ```
-bitcoind (pruned)  ──JSON-RPC──▶  solo-pool  ──Stratum V1──▶  mac-miner
+bitcoind (pruned)  ──JSON-RPC──▶  pool  ──Stratum V1──▶  miner
    regtest             ZMQ          builds the block           finds the nonce
    testnet4                         template, validates
    mainnet                          shares, submits blocks
@@ -50,7 +52,7 @@ bitcoind (pruned)  ──JSON-RPC──▶  solo-pool  ──Stratum V1──▶
 
 The pool and the miner are separate processes talking over real TCP. That is
 not ceremony: it is what makes the protocol boundary honest, and it means an
-ASIC (a Bitaxe, say) can later replace `mac-miner` as the hashing client
+ASIC (a Bitaxe, say) can later replace `miner` as the hashing client
 without the pool changing at all.
 
 ## Crate map
@@ -63,8 +65,8 @@ without the pool changing at all.
 | `mining` | Coinbase construction, block assembly, nonce search. Pure, no I/O. |
 | `regtest-miner` | End-to-end miner for a local regtest chain. |
 | `stratum` | Stratum V1 wire types, shared by pool and miner so they cannot disagree. Owns the byte-order conventions. |
-| `solo-pool` | The solo mining pool: bitcoind on one side, Stratum on the other. |
-| `mac-miner` | The hashing client. Knows nothing about blocks or the node. |
+| `pool` | The solo mining pool: bitcoind on one side, Stratum on the other. |
+| `miner` | The hashing client. Knows nothing about blocks or the node. |
 
 ## Phases
 
@@ -72,7 +74,7 @@ without the pool changing at all.
 - [x] **1** — `sha256d`: reproduces the genesis and block-100000 hashes
 - [x] **2** — `btc-primitives`: rebuilds a real block's merkle root from its txids
 - [x] **3** — Monolithic regtest miner — *bitcoind accepts a block we mined*
-- [x] **4** — Split into `solo-pool` + `mac-miner` over Stratum V1
+- [x] **4** — Split into `pool` + `miner` over Stratum V1
 - [x] **5** — Optimise: midstate, ARM crypto extensions, multithreading
 - [x] **6** — testnet4 — *built a valid block a real node accepted as its tip*
 - [x] **7** — Mainnet pruned node, "lottery mode"
@@ -106,17 +108,17 @@ accepts is wrong in no way it is being lenient about.
 Two processes, real TCP between them:
 
 ```bash
-cargo run --release -p solo-pool -- --network regtest
+cargo run --release -p pool -- --network regtest
 ```
 
 ```bash
-cargo run --release -p mac-miner -- --pool 127.0.0.1:3333 --worker mac.0
+cargo run --release -p miner -- --pool 127.0.0.1:3333 --worker mac.0
 ```
 
 The miner uses one thread per logical core by default; `--threads N` overrides
 it.
 
-The pool serves Stratum V1, so `mac-miner` is replaceable: point an ASIC at
+The pool serves Stratum V1, so `miner` is replaceable: point an ASIC at
 port 3333 instead and nothing on the pool side changes. That is the whole reason
 the split exists.
 
@@ -129,7 +131,7 @@ the split exists.
 One command: it refuses to start unless the node is synced, validates the
 payout address against the network, starts the pool and the miner, and stops
 both on Ctrl-C. The payout address is read from
-`~/.solo-mac-miner/payout.mainnet` — outside the repo, so it never reaches git.
+`~/.btc-miner/payout.mainnet` — outside the repo, so it never reaches git.
 
 `--threads half` uses four of eight cores for about 70% of full hashrate and
 much less heat. The default leaves two cores free; `--threads max` uses all of
@@ -137,7 +139,7 @@ them.
 
 Stopping costs nothing. Mining is memoryless, so an hour today and an hour next
 month are worth exactly what two hours now would be — which is why
-`~/.solo-mac-miner/lifetime.json` accumulates across sessions:
+`~/.btc-miner/lifetime.json` accumulates across sessions:
 
 ```
   30.83 MH/s (avg  30.50)   session  610.27M   best 30/78 bits   00000002894d5...

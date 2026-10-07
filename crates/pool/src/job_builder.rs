@@ -75,7 +75,7 @@ impl ActiveJob {
     pub fn coinbase(&self, extranonce: &[u8]) -> Result<btc_primitives::Transaction, BuildError> {
         CoinbaseBuilder::new(self.height, self.coinbase_value, self.payout_script.clone())
             .extranonce(extranonce.to_vec())
-            .tag(b"solo-mac-miner".to_vec())
+            .tag(b"btc-miner".to_vec())
             .witness_commitment(self.witness_commitment.clone())
             .build()
             .map_err(BuildError::Coinbase)

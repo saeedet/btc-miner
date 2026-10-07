@@ -10,7 +10,7 @@
 # The payout address is read, in order of preference, from:
 #   1. --address
 #   2. $SOLO_PAYOUT_ADDRESS
-#   3. ~/.solo-mac-miner/payout.<network>
+#   3. ~/.btc-miner/payout.<network>
 #
 # The file is the convenient option: an address in a shell command ends up in
 # your history, and one committed to a public repo permanently links your
@@ -42,7 +42,13 @@ done
 die() { echo "error: $*" >&2; exit 1; }
 
 # --- The payout address --------------------------------------------------
-ADDRESS_FILE="$HOME/.solo-mac-miner/payout.$NETWORK"
+# State lived in ~/.solo-mac-miner before the project was renamed to btc-miner.
+# Move it once, so the payout address and lifetime totals carry over.
+if [[ ! -e "$HOME/.btc-miner" && -d "$HOME/.solo-mac-miner" ]]; then
+  mv "$HOME/.solo-mac-miner" "$HOME/.btc-miner"
+  echo "moved ~/.solo-mac-miner to ~/.btc-miner"
+fi
+ADDRESS_FILE="$HOME/.btc-miner/payout.$NETWORK"
 if [[ -z "$ADDRESS" && -f "$ADDRESS_FILE" ]]; then
   ADDRESS="$(tr -d '[:space:]' < "$ADDRESS_FILE")"
   echo "payout address from $ADDRESS_FILE"
@@ -57,7 +63,7 @@ fi
 export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
 command -v cargo > /dev/null || die "cargo not found. Install Rust, or build manually and edit this script."
 echo "building..."
-cargo build --release -q -p solo-pool -p mac-miner || die "build failed"
+cargo build --release -q -p pool -p miner || die "build failed"
 
 # --- Refuse to mine on a node that is not ready --------------------------
 #
@@ -65,7 +71,7 @@ cargo build --release -q -p solo-pool -p mac-miner || die "build failed"
 # the block would build on a parent the network has already moved past, and
 # every hash spent on it is spent on something that cannot be accepted.
 # The pool owns this decision — it checks the chain, the sync state, the peer
-# count and the tip's age in one place (see crates/solo-pool/src/readiness.rs).
+# count and the tip's age in one place (see crates/pool/src/readiness.rs).
 # Repeating a weaker version here would only give two answers that can drift
 # apart. This just fails fast, with a friendlier message, when there is plainly
 # no node at all.
@@ -80,8 +86,8 @@ cargo build --release -q -p solo-pool -p mac-miner || die "build failed"
 # somebody's business and we stop instead.
 STALE="$(lsof -nP -iTCP:3333 -sTCP:LISTEN -t 2>/dev/null || true)"
 if [[ -n "$STALE" ]]; then
-  if ps -p "$STALE" -o command= | grep -q solo-pool; then
-    echo "clearing a stale solo-pool (pid $STALE) still holding port 3333"
+  if ps -p "$STALE" -o command= | grep -q "target/release/pool"; then
+    echo "clearing a stale pool (pid $STALE) still holding port 3333"
     kill "$STALE" 2>/dev/null
     sleep 1
   else
@@ -90,7 +96,7 @@ if [[ -n "$STALE" ]]; then
 fi
 
 # --- Run -----------------------------------------------------------------
-POOL_LOG="$(mktemp -t solo-pool)"
+POOL_LOG="$(mktemp -t btc-miner-pool)"
 
 # Everything started here must die with the script. Note the miner below is NOT
 # exec'd: exec would replace this shell, taking the trap with it, and the pool
@@ -126,7 +132,7 @@ trap 'cleanup; exit 130' INT   # 128 + SIGINT(2)
 trap 'cleanup; exit 143' TERM  # 128 + SIGTERM(15)
 trap cleanup EXIT
 
-./target/release/solo-pool --network "$NETWORK" --address "$ADDRESS" > "$POOL_LOG" 2>&1 &
+./target/release/pool --network "$NETWORK" --address "$ADDRESS" > "$POOL_LOG" 2>&1 &
 POOL_PID=$!
 
 # Wait for the pool to announce that it has *built a job*, not merely that its
@@ -169,7 +175,7 @@ MINER_ARGS=(--pool 127.0.0.1:3333 --worker "mac.$NETWORK")
 # running command finishes, so a SIGTERM aimed at this script alone would sit
 # pending while the miner ran on, and nothing would ever stop. `wait` is
 # interruptible, so the trap fires immediately either way.
-./target/release/mac-miner "${MINER_ARGS[@]}" &
+./target/release/miner "${MINER_ARGS[@]}" &
 MINER_PID=$!
 wait "$MINER_PID"
 MINER_STATUS=$?
