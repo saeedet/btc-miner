@@ -350,6 +350,7 @@ fn poll_templates(
                                     job_id: job.job.job_id.clone(),
                                     transactions,
                                     miners: state.subscriber_count(),
+                                    reward: template.coinbase_value,
                                 });
                             } else if bits_changed {
                                 sink.emit(Event::DifficultyChanged {
