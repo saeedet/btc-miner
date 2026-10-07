@@ -46,6 +46,11 @@ ARGS=(-datadir="$DATADIR" -conf="$CONF")
 # directories across the external drive.
 if [[ -n "${SOLO_BLOCKSDIR:-}" && "$NETWORK" == "mainnet" ]]; then
   [[ -d "$SOLO_BLOCKSDIR/blocks" ]] || die "SOLO_BLOCKSDIR=$SOLO_BLOCKSDIR has no blocks/ subdirectory"
+  # A pruning node deletes old block files as it goes. Pointed at a full
+  # archive, that destroys the very thing the archive exists to keep.
+  if grep -qE '^[[:space:]]*prune=[1-9]' "$CONF"; then
+    die "SOLO_BLOCKSDIR is set but $CONF enables pruning, which would delete the archive's old block files. Remove prune= from the config first."
+  fi
   ARGS+=(-blocksdir="$SOLO_BLOCKSDIR")
 fi
 
