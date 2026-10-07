@@ -30,6 +30,9 @@ use std::time::{Duration, Instant};
 
 use stratum::{Request, Share, method};
 
+use events::{Event, Level, Sink};
+
+use crate::controls::Controls;
 use crate::stats::Stats;
 use crate::work::WorkState;
 
@@ -53,16 +56,23 @@ struct Shared {
     extranonce_counter: AtomicU64,
     /// JSON-RPC ids for submissions.
     submit_id: AtomicU64,
+    controls: Arc<Controls>,
+    sink: Arc<dyn Sink>,
 }
 
-/// Starts `threads` mining threads and returns immediately.
+/// Starts `slots` mining threads and returns their handles.
+///
+/// Only as many as [`Controls::threads`] allows actually hash; the rest wait
+/// idle, so the count can rise again later without spawning anything.
 pub fn spawn(
     state: Arc<WorkState>,
     stats: Arc<Stats>,
     outbound: Sender<String>,
     worker: String,
-    threads: usize,
-) {
+    slots: usize,
+    controls: Arc<Controls>,
+    sink: Arc<dyn Sink>,
+) -> Vec<std::thread::JoinHandle<()>> {
     let shared = Arc::new(Shared {
         state,
         stats,
@@ -70,17 +80,33 @@ pub fn spawn(
         worker,
         extranonce_counter: AtomicU64::new(0),
         submit_id: AtomicU64::new(100),
+        controls,
+        sink,
     });
 
-    for _ in 0..threads {
-        let shared = Arc::clone(&shared);
-        std::thread::spawn(move || mine(&shared));
-    }
+    (0..slots)
+        .map(|index| {
+            let shared = Arc::clone(&shared);
+            std::thread::spawn(move || mine(&shared, index))
+        })
+        .collect()
 }
 
-/// One mining thread, running until the connection drops.
-fn mine(shared: &Shared) {
+/// How long an idle thread sleeps before checking whether it is wanted.
+const IDLE_POLL: Duration = Duration::from_millis(200);
+
+/// One mining thread, running until it is told to stop.
+fn mine(shared: &Shared, index: usize) {
     loop {
+        if shared.controls.stopping() {
+            return;
+        }
+        // Paused, or surplus to the current power setting.
+        if !shared.controls.should_hash(index) {
+            std::thread::sleep(IDLE_POLL);
+            continue;
+        }
+
         let Some((work, generation)) = shared.state.snapshot() else {
             // No job yet. Wait rather than spin.
             std::thread::sleep(Duration::from_millis(100));
@@ -103,7 +129,9 @@ fn mine(shared: &Shared) {
         let header = work.job.header(&work.extranonce1, &extranonce2, work.job.time, 0);
 
         let mut start = 0u32;
-        while shared.state.is_current(generation) {
+        // The controls are read once per batch, so a stop, a pause or a power
+        // change takes effect within a few tens of milliseconds.
+        while shared.state.is_current(generation) && shared.controls.should_hash(index) {
             let end = batch_end(start);
             let result = mining::search(&header, &work.target, start..=end);
 
@@ -139,11 +167,10 @@ fn submit(
     time: u32,
     solution: mining::Solution,
 ) {
-    println!(
-        "solution found: {} ({} zero bits)",
-        solution.hash,
-        solution.hash.leading_zero_bits()
-    );
+    shared.sink.emit(Event::SolutionFound {
+        hash: solution.hash.to_string(),
+        zero_bits: solution.hash.leading_zero_bits(),
+    });
 
     let share = Share {
         worker: shared.worker.clone(),
@@ -159,7 +186,10 @@ fn submit(
         Ok(line) => {
             let _ = shared.outbound.send(line);
         }
-        Err(error) => eprintln!("cannot serialise share: {error}"),
+        Err(error) => shared.sink.emit(Event::Log {
+            level: Level::Warn,
+            text: format!("cannot serialise share: {error}"),
+        }),
     }
 }
 
