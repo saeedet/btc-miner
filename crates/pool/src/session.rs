@@ -17,6 +17,7 @@ use std::sync::mpsc::{Receiver, Sender, channel};
 
 use bitcoind_rpc::RpcClient;
 use btc_primitives::{Target, hex};
+use events::{Event, Level, Sink};
 use serde_json::json;
 use stratum::{Incoming, Request, Response, Share, StratumError, method};
 
@@ -25,7 +26,12 @@ use crate::state::PoolState;
 use crate::validate::{self, Verdict};
 
 /// Serves one miner until it disconnects.
-pub fn handle(stream: TcpStream, state: Arc<PoolState>, client: Arc<RpcClient>) {
+pub fn handle(
+    stream: TcpStream,
+    state: Arc<PoolState>,
+    client: Arc<RpcClient>,
+    sink: Arc<dyn Sink>,
+) {
     let connection_id = state.allocate_connection_id();
     let peer = stream
         .peer_addr()
@@ -36,14 +42,20 @@ pub fn handle(stream: TcpStream, state: Arc<PoolState>, client: Arc<RpcClient>) 
     let extranonce1 = (connection_id as u32).to_be_bytes().to_vec();
 
     let Ok(write_half) = stream.try_clone() else {
-        eprintln!("[{peer}] cannot split the socket, dropping connection");
+        sink.emit(Event::Log {
+            level: Level::Warn,
+            text: format!("[{peer}] cannot split the socket, dropping connection"),
+        });
         return;
     };
 
     let (outbound, inbox) = channel::<String>();
     std::thread::spawn(move || writer_loop(write_half, inbox));
 
-    println!("[{peer}] connected (extranonce1 {})", hex::encode(&extranonce1));
+    sink.emit(Event::MinerConnected {
+        peer: peer.clone(),
+        extranonce1: hex::encode(&extranonce1),
+    });
 
     let mut session = Session {
         peer: peer.clone(),
@@ -53,6 +65,7 @@ pub fn handle(stream: TcpStream, state: Arc<PoolState>, client: Arc<RpcClient>) 
         outbound: outbound.clone(),
         state: Arc::clone(&state),
         client,
+        sink: Arc::clone(&sink),
     };
 
     let reader = BufReader::new(stream);
@@ -68,7 +81,7 @@ pub fn handle(stream: TcpStream, state: Arc<PoolState>, client: Arc<RpcClient>) 
     }
 
     state.unsubscribe(connection_id);
-    println!("[{peer}] disconnected");
+    sink.emit(Event::MinerDisconnected { peer });
 }
 
 /// Drains the outbound channel onto the socket.
@@ -92,6 +105,7 @@ struct Session {
     outbound: Sender<String>,
     state: Arc<PoolState>,
     client: Arc<RpcClient>,
+    sink: Arc<dyn Sink>,
 }
 
 impl Session {
@@ -103,7 +117,7 @@ impl Session {
             // dropping the connection over.
             Ok(Incoming::Response(_)) => return true,
             Err(error) => {
-                eprintln!("[{}] {error}", self.peer);
+                self.warn(format!("[{}] {error}", self.peer));
                 return true;
             }
         };
@@ -161,7 +175,10 @@ impl Session {
             .and_then(|value| value.as_str())
             .unwrap_or("<anonymous>");
 
-        println!("[{}] authorized worker {worker}", self.peer);
+        self.sink.emit(Event::MinerAuthorized {
+            peer: self.peer.clone(),
+            worker: worker.to_owned(),
+        });
         self.authorized = true;
         self.reply(Response::ok(request.id, json!(true)));
 
@@ -192,11 +209,13 @@ impl Session {
             return;
         };
 
-        match validate::check(&self.client, &active, &share, &self.extranonce1) {
+        match validate::check(&self.client, &active, &share, &self.extranonce1, self.sink.as_ref()) {
             Ok(Verdict::BlockAccepted { hash, height }) => {
-                println!("\n*** BLOCK FOUND at height {height} ***");
-                println!("    {hash}");
-                println!("    submitted by {} and accepted by bitcoind\n", self.peer);
+                self.sink.emit(Event::BlockFound {
+                    height,
+                    hash: hash.to_string(),
+                    peer: self.peer.clone(),
+                });
                 self.reply(Response::ok(request.id, json!(true)));
 
                 // We just moved the tip ourselves. Everything every miner is
@@ -208,25 +227,36 @@ impl Session {
             Ok(Verdict::BlockStale { reason, hash }) => {
                 // Valid work that lost a race, not a fault. Still worth asking
                 // for fresh work, since it means our idea of the tip is behind.
-                println!("[{}] block {hash} not adopted ({reason})", self.peer);
+                self.sink.emit(Event::BlockStale {
+                    peer: self.peer.clone(),
+                    hash: hash.to_string(),
+                    reason,
+                });
                 self.reply(Response::ok(request.id, json!(true)));
                 self.state.request_refresh();
             }
             Ok(Verdict::BlockRejected { reason, hash }) => {
                 // The work was real, so this is our bug, not the miner's.
-                eprintln!("[{}] bitcoind REJECTED a solved block: {reason}", self.peer);
-                eprintln!("    hash was {hash}");
+                self.sink.emit(Event::BlockRejected {
+                    peer: self.peer.clone(),
+                    hash: hash.to_string(),
+                    reason: reason.clone(),
+                });
                 self.reply(Response::error(
                     request.id,
                     StratumError::other(format!("node rejected block: {reason}")),
                 ));
             }
             Ok(Verdict::Share { hash, zero_bits }) => {
-                println!("[{}] share {zero_bits} zero bits  {hash}", self.peer);
+                self.sink.emit(Event::ShareChecked {
+                    peer: self.peer.clone(),
+                    zero_bits,
+                    hash: hash.to_string(),
+                });
                 self.reply(Response::ok(request.id, json!(true)));
             }
             Err(error) => {
-                eprintln!("[{}] cannot validate share: {error}", self.peer);
+                self.warn(format!("[{}] cannot validate share: {error}", self.peer));
                 self.reply(Response::error(
                     request.id,
                     StratumError::other(error.to_string()),
@@ -262,7 +292,7 @@ impl Session {
             Ok(line) => {
                 let _ = self.outbound.send(line);
             }
-            Err(error) => eprintln!("[{}] cannot serialise response: {error}", self.peer),
+            Err(error) => self.warn(format!("[{}] cannot serialise response: {error}", self.peer)),
         }
     }
 
@@ -271,7 +301,13 @@ impl Session {
             Ok(line) => {
                 let _ = self.outbound.send(line);
             }
-            Err(error) => eprintln!("[{}] cannot serialise notification: {error}", self.peer),
+            Err(error) => {
+                self.warn(format!("[{}] cannot serialise notification: {error}", self.peer));
+            }
         }
+    }
+
+    fn warn(&self, text: String) {
+        self.sink.emit(Event::Log { level: Level::Warn, text });
     }
 }

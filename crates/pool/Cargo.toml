@@ -11,6 +11,7 @@ btc-primitives.workspace = true
 bitcoind-rpc.workspace = true
 mining.workspace = true
 stratum.workspace = true
+events.workspace = true
 serde_json.workspace = true
 
 [lints]

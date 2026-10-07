@@ -15,6 +15,7 @@ use mining::BlockBuilder;
 use stratum::Share;
 
 use crate::job_builder::ActiveJob;
+use events::{Event, Sink};
 
 /// Longest we will sit on a solved block waiting for its timestamp to become
 /// legal. Bounded so a mistake in the window arithmetic stalls one share rather
@@ -75,6 +76,7 @@ pub fn check(
     active: &ActiveJob,
     share: &Share,
     extranonce1: &[u8],
+    sink: &dyn Sink,
 ) -> Result<Verdict, ValidationError> {
     // The full extranonce is the pool's half followed by the miner's.
     let mut extranonce = Vec::with_capacity(extranonce1.len() + share.extranonce2.len());
@@ -133,7 +135,7 @@ pub fn check(
         let wait = not_before - unix_now();
         if wait > 0 {
             let wait = wait.min(MAX_SUBMISSION_HOLD);
-            println!("  block solved early — holding {wait}s until it can be submitted");
+            sink.emit(Event::BlockHeld { seconds: wait });
             std::thread::sleep(std::time::Duration::from_secs(wait as u64));
         }
     }

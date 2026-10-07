@@ -59,11 +59,16 @@ impl RpcClient {
     /// Reads the cookie immediately, so a misconfigured datadir or a node that
     /// is not running fails here rather than on the first real call.
     pub fn from_datadir(datadir: &Path, network: Network) -> Result<Self, RpcError> {
+        Self::connect(datadir, network, network.default_rpc_port())
+    }
+
+    /// Connects to a node on an explicit port.
+    ///
+    /// For a node whose configuration moves its RPC port — which is how two
+    /// nodes on the same machine avoid colliding.
+    pub fn connect(datadir: &Path, network: Network, port: u16) -> Result<Self, RpcError> {
         let credentials = Credentials::from_cookie_file(&network.cookie_path(datadir))?;
-        let address = SocketAddr::new(
-            IpAddr::V4(Ipv4Addr::LOCALHOST),
-            network.default_rpc_port(),
-        );
+        let address = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), port);
 
         Ok(Self {
             http: HttpClient::new(address, DEFAULT_TIMEOUT),
