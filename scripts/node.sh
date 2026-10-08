@@ -38,8 +38,8 @@ ARGS=(-datadir="$DATADIR" -conf="$CONF")
 
 # Block files can live somewhere other than the datadir — an external drive
 # holding an archival copy, for instance. `-blocksdir` names the PARENT of the
-# `blocks/` directory, so SOLO_BLOCKSDIR=/Volumes/Expansion finds
-# /Volumes/Expansion/blocks.
+# `blocks/` directory, so SOLO_BLOCKSDIR=/Volumes/Archive finds
+# /Volumes/Archive/blocks.
 #
 # Applied only to mainnet: regtest and testnet chains are small and belong on
 # fast internal storage, and pointing them at the same parent would scatter new

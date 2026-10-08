@@ -10,7 +10,7 @@
 //! cause them to quarantine or corrupt block files.
 //!
 //! The consequence that matters here: **without `xor.dat`, the block files are
-//! unreadable noise.** It is eight bytes standing in front of 810 GB.
+//! unreadable noise.** It is eight bytes standing in front of the whole chain.
 //!
 //! The key is applied by position within the file, so the byte at offset `i` is
 //! stored as `plain[i] ^ key[i % 8]`. That makes it seekable — any offset can
@@ -71,8 +71,8 @@ impl ObfuscationKey {
 mod tests {
     use super::*;
 
-    /// The real key and the real first bytes of the recovered archive's
-    /// `blk00001.dat`, which must decode to the mainnet magic bytes.
+    /// A real key and the real first bytes of a mainnet `blk00001.dat`,
+    /// which must decode to the mainnet magic bytes.
     ///
     /// This is a genuine end-to-end check: if the key application is wrong by
     /// even one position, `f9beb4d9` does not appear.

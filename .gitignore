@@ -11,3 +11,6 @@
 # belong in version control.
 /secrets/
 *.env
+
+# macOS folder metadata.
+.DS_Store
