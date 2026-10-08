@@ -5,7 +5,7 @@
 //! takes to mature, which peers count as being on the right network — live
 //! here, so the two projects differ in this file and not all over.
 
-use bitcoind_rpc::Network;
+use bitcoind_rpc::{Network, RpcClient};
 use serde_json::Value;
 
 use crate::setup::address::Way;
@@ -71,6 +71,12 @@ pub const fn snapshot(network: Network) -> Option<Snapshot> {
         }),
         Network::Testnet4 | Network::Regtest => None,
     }
+}
+
+/// Readies a regtest chain to be mined through the pool. Bitcoin's pool can
+/// mine a chain from its very first block, so there is nothing to do.
+pub const fn prepare_regtest(_client: &RpcClient) -> Result<Option<String>, String> {
+    Ok(None)
 }
 
 /// Blocks a coinbase must wait before it can be spent: 100, on every network.
