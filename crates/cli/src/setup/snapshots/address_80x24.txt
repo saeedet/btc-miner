@@ -1,0 +1,24 @@
+╭─ btc-miner · getting set up ──────────────────────────────────────── 3 of 4 ─╮
+│                                                                              │
+│    ✔  This computer    Apple M3 · 8 cores · 146 GB free                      │
+│    ✔  Node software    Core 31.1.0                                           │
+│    ●  Reward address   not set   ← now                                       │
+│    ○  Blockchain       starting the node…                                    │
+│                                                                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  If your computer ever finds a block, the reward goes to an address you      │
+│  own.                                                                        │
+│                                                                              │
+│  Any Bitcoin wallet can give you one: a phone app, a hardware wallet, or a   │
+│  wallet on this node. Use one whose backup you already keep safe.            │
+│                                                                              │
+│    ▸ Paste an address from my wallet   (recommended)                         │
+│      Create a wallet on this node, protected by a passphrase                 │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+╰─ ↑↓ choose · enter confirm · q quit ─────────────────────────────────────────╯

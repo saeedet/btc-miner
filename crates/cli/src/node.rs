@@ -22,6 +22,9 @@ use crate::platform;
 /// so it is better to say why up front than to pass on its error.
 pub const MIN_CORE: (u32, u32, u32) = (28, 0, 0);
 
+/// The minimum under the name shared code uses, whichever node this is.
+pub use self::MIN_CORE as MIN_VERSION;
+
 /// The node's configuration for each network, compiled in so an installed
 /// binary does not depend on the source tree.
 fn template(network: Network) -> &'static str {
@@ -138,6 +141,9 @@ pub fn start(settings: &Settings, mut waiting: impl FnMut(Duration)) -> Result<(
     let output = Command::new(settings.binaries.join(platform::node_daemon()))
         .arg(format!("-datadir={}", settings.datadir.display()))
         .arg(format!("-conf={}", conf.display()))
+        // Wins over the config file's own port, so a port moved because
+        // something else held the usual one takes effect.
+        .arg(format!("-rpcport={}", settings.rpc_port))
         .arg("-daemon")
         .output()
         .map_err(|error| format!("cannot start the node: {error}"))?;
