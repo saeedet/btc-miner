@@ -6,6 +6,8 @@ All notable changes to this project. The format follows
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-08
+
 The first release, as one command anyone can run.
 
 ### Added
@@ -57,3 +59,6 @@ Developed in stages, each with its result checked against real data:
   extensions, midstate and threads.
 - A testnet4 block accepted by a real node as its tip, and a pruned mainnet
   node.
+
+[Unreleased]: https://github.com/saeedet/btc-miner/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/saeedet/btc-miner/releases/tag/v0.1.0
