@@ -4,6 +4,8 @@ version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+repository.workspace = true
+publish.workspace = true
 description = "A Stratum V1 mining client that hashes on the CPU"
 
 [dependencies]
