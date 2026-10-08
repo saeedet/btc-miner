@@ -25,15 +25,24 @@ for the BIP-110 fork.
 ## What you need
 
 - A Mac with Apple Silicon (M1 or later), on macOS.
-- [Homebrew](https://brew.sh), which setup uses to install Bitcoin Core.
+- [Homebrew](https://brew.sh).
 - About **27 GB** of free disk on mainnet.
 - An internet connection. The first sync downloads on the order of 100 GB,
   though the node keeps only the most recent 5 GB of blocks.
 
 ## Install
 
-There's no packaged release yet, so for now it is built from source. That needs
-[Rust](https://rustup.rs):
+With [Homebrew](https://brew.sh):
+
+```bash
+brew install saeedet/tap/btc-miner
+```
+
+Bitcoin Core comes with it, so there is nothing else to install.
+
+### From source
+
+Building it yourself needs [Rust](https://rustup.rs):
 
 ```bash
 git clone https://github.com/saeedet/btc-miner.git
@@ -109,8 +118,10 @@ this program does can touch another node or wallet on the same Mac.
 
 ```bash
 btc-miner stop
-cargo uninstall btc-miner
+brew uninstall btc-miner
 ```
+
+(or `cargo uninstall btc-miner` if you built it from source)
 
 Then delete `~/.btc-miner`, and `~/.bitcoin-solo` for the blockchain — **after
 backing up and moving any wallet in it that holds coins**. `brew uninstall
