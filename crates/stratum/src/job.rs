@@ -81,10 +81,7 @@ impl Job {
     /// Splices the extranonce into the coinbase, witness-free.
     pub fn coinbase(&self, extranonce1: &[u8], extranonce2: &[u8]) -> Vec<u8> {
         let mut coinbase = Vec::with_capacity(
-            self.coinbase_prefix.len()
-                + extranonce1.len()
-                + extranonce2.len()
-                + self.coinbase_suffix.len(),
+            self.coinbase_prefix.len() + extranonce1.len() + extranonce2.len() + self.coinbase_suffix.len(),
         );
 
         coinbase.extend_from_slice(&self.coinbase_prefix);
@@ -110,13 +107,7 @@ impl Job {
     /// `time` is passed separately because a miner is allowed to roll it within
     /// the range consensus permits, which buys extra search space beyond the
     /// nonce and extranonce.
-    pub fn header(
-        &self,
-        extranonce1: &[u8],
-        extranonce2: &[u8],
-        time: u32,
-        nonce: u32,
-    ) -> BlockHeader {
+    pub fn header(&self, extranonce1: &[u8], extranonce2: &[u8], time: u32, nonce: u32) -> BlockHeader {
         BlockHeader {
             version: self.version,
             prev_block: self.prev_hash,
@@ -129,11 +120,8 @@ impl Job {
 
     /// Encodes this job as `mining.notify` parameters.
     pub fn to_notify_params(&self) -> Value {
-        let branch: Vec<String> = self
-            .merkle_branch
-            .iter()
-            .map(|hash| hex::encode(hash.as_internal_bytes()))
-            .collect();
+        let branch: Vec<String> =
+            self.merkle_branch.iter().map(|hash| hex::encode(hash.as_internal_bytes())).collect();
 
         json!([
             self.job_id,

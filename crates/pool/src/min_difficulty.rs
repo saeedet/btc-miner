@@ -85,10 +85,7 @@ pub fn plan(parent_time: u32) -> Window {
     // Strictly greater than parent + gap, so one second past it.
     let ntime = i64::from(parent_time) + MIN_DIFFICULTY_GAP + 1;
 
-    Window {
-        ntime: ntime as u32,
-        legal_at: ntime - MAX_FUTURE_BLOCK_TIME,
-    }
+    Window { ntime: ntime as u32, legal_at: ntime - MAX_FUTURE_BLOCK_TIME }
 }
 
 #[cfg(test)]

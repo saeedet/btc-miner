@@ -160,13 +160,7 @@ fn mine(shared: &Shared, index: usize) {
 }
 
 /// Sends a share to the pool.
-fn submit(
-    shared: &Shared,
-    job_id: &str,
-    extranonce2: &[u8],
-    time: u32,
-    solution: mining::Solution,
-) {
+fn submit(shared: &Shared, job_id: &str, extranonce2: &[u8], time: u32, solution: mining::Solution) {
     shared.sink.emit(Event::SolutionFound {
         hash: solution.hash.to_string(),
         zero_bits: solution.hash.leading_zero_bits(),
@@ -186,10 +180,9 @@ fn submit(
         Ok(line) => {
             let _ = shared.outbound.send(line);
         }
-        Err(error) => shared.sink.emit(Event::Log {
-            level: Level::Warn,
-            text: format!("cannot serialise share: {error}"),
-        }),
+        Err(error) => shared
+            .sink
+            .emit(Event::Log { level: Level::Warn, text: format!("cannot serialise share: {error}") }),
     }
 }
 
@@ -295,9 +288,8 @@ mod tests {
     #[test]
     fn claimed_extranonces_are_distinct() {
         let counter = AtomicU64::new(0);
-        let claimed: Vec<_> = (0..64)
-            .map(|_| encode_extranonce2(counter.fetch_add(1, Ordering::Relaxed), 4))
-            .collect();
+        let claimed: Vec<_> =
+            (0..64).map(|_| encode_extranonce2(counter.fetch_add(1, Ordering::Relaxed), 4)).collect();
 
         let unique: std::collections::HashSet<_> = claimed.iter().collect();
         assert_eq!(unique.len(), claimed.len());

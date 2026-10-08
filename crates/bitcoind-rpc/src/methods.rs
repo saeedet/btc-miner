@@ -77,10 +77,7 @@ impl RpcClient {
     /// that has not said it understands SegWit, because such a client would
     /// build an invalid block.
     pub fn get_block_template(&self) -> Result<BlockTemplate, RpcError> {
-        self.call(
-            "getblocktemplate",
-            json!([{ "rules": ["segwit"], "mode": "template" }]),
-        )
+        self.call("getblocktemplate", json!([{ "rules": ["segwit"], "mode": "template" }]))
     }
 
     /// Submits a solved block.

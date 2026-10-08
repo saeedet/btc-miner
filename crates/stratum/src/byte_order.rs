@@ -110,10 +110,8 @@ mod tests {
 
     #[test]
     fn round_trips_through_the_wire_form() {
-        let hash = Sha256dHash::from_str(
-            "000000000003ba27aa200b1cecaad478d2b00432346c3f1f3986da1afd33e506",
-        )
-        .expect("valid");
+        let hash = Sha256dHash::from_str("000000000003ba27aa200b1cecaad478d2b00432346c3f1f3986da1afd33e506")
+            .expect("valid");
 
         assert_eq!(hash_from_stratum(hash_to_stratum(hash)), hash);
     }
@@ -122,10 +120,8 @@ mod tests {
     /// why this module exists.
     #[test]
     fn the_three_orders_differ() {
-        let hash = Sha256dHash::from_str(
-            "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
-        )
-        .expect("valid");
+        let hash = Sha256dHash::from_str("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f")
+            .expect("valid");
 
         let display = hash.to_string();
         let internal = hex::encode(hash.as_internal_bytes());

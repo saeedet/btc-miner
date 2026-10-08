@@ -42,10 +42,8 @@ fn main() {
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
 
-    let blocks_dir = PathBuf::from(
-        args.next()
-            .ok_or("usage: blk-concat <blocks-dir> <output> <file> [file ...]")?,
-    );
+    let blocks_dir =
+        PathBuf::from(args.next().ok_or("usage: blk-concat <blocks-dir> <output> <file> [file ...]")?);
     let output_path = PathBuf::from(args.next().ok_or("missing output path")?);
     let inputs: Vec<String> = args.collect();
 

@@ -29,18 +29,11 @@ fn main() {
 fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut args = std::env::args().skip(1);
 
-    let blocks_dir = PathBuf::from(
-        args.next()
-            .ok_or("usage: blk-scan <blocks-dir> [file ...]")?,
-    );
+    let blocks_dir = PathBuf::from(args.next().ok_or("usage: blk-scan <blocks-dir> [file ...]")?);
 
     let files: Vec<String> = {
         let named: Vec<String> = args.collect();
-        if named.is_empty() {
-            vec!["blk00000.dat".to_owned(), "blk00001.dat".to_owned()]
-        } else {
-            named
-        }
+        if named.is_empty() { vec!["blk00000.dat".to_owned(), "blk00001.dat".to_owned()] } else { named }
     };
 
     let key = ObfuscationKey::from_blocks_dir(&blocks_dir)?;

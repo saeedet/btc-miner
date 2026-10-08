@@ -85,17 +85,11 @@ fn genesis_block_header() {
     let hash = sha256d::sha256d(&header);
 
     // The famous hash, as any block explorer shows it.
-    assert_eq!(
-        bitcoin_display(&hash),
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
-    );
+    assert_eq!(bitcoin_display(&hash), "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
 
     // And the same value in the order it actually lives in memory — note the
     // leading zeros have moved to the *end*.
-    assert_eq!(
-        to_hex(&hash),
-        "6fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d6190000000000"
-    );
+    assert_eq!(to_hex(&hash), "6fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d6190000000000");
 }
 
 /// Block 100000, mined 29 December 2010.

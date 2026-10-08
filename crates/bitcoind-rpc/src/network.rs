@@ -83,19 +83,10 @@ mod tests {
     fn cookie_paths_match_bitcoin_core_layout() {
         let datadir = Path::new("/tmp/data");
 
-        assert_eq!(
-            Network::Regtest.cookie_path(datadir),
-            Path::new("/tmp/data/regtest/.cookie")
-        );
-        assert_eq!(
-            Network::Testnet4.cookie_path(datadir),
-            Path::new("/tmp/data/testnet4/.cookie")
-        );
+        assert_eq!(Network::Regtest.cookie_path(datadir), Path::new("/tmp/data/regtest/.cookie"));
+        assert_eq!(Network::Testnet4.cookie_path(datadir), Path::new("/tmp/data/testnet4/.cookie"));
         // Mainnet has no subdirectory.
-        assert_eq!(
-            Network::Mainnet.cookie_path(datadir),
-            Path::new("/tmp/data/.cookie")
-        );
+        assert_eq!(Network::Mainnet.cookie_path(datadir), Path::new("/tmp/data/.cookie"));
     }
 
     /// `getblockchaininfo` reports mainnet as "main", so parsing must round-trip.

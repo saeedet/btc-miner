@@ -59,11 +59,7 @@ pub struct Solution {
 /// An exclusive `0..u32::MAX` silently omits `0xFFFFFFFF`, and there is no
 /// exclusive range over `u32` that includes it — the end would have to be
 /// 2^32, which does not fit.
-pub fn search(
-    header: &BlockHeader,
-    target: &Target,
-    range: std::ops::RangeInclusive<u32>,
-) -> SearchResult {
+pub fn search(header: &BlockHeader, target: &Target, range: std::ops::RangeInclusive<u32>) -> SearchResult {
     // Compress the unchanging first block once, here, instead of per nonce.
     let hasher = HeaderHasher::new(&header.serialize());
 
@@ -90,12 +86,7 @@ pub fn search(
         }
     }
 
-    SearchResult {
-        solution: None,
-        hashes,
-        best,
-        best_nonce,
-    }
+    SearchResult { solution: None, hashes, best, best_nonce }
 }
 
 #[cfg(test)]

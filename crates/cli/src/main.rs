@@ -10,12 +10,12 @@ mod chain;
 mod commands;
 mod config;
 mod dashboard;
-mod setup;
 mod node;
 mod platform;
+mod setup;
 
-use clap::{Parser, Subcommand};
 use bitcoind_rpc::Network;
+use clap::{Parser, Subcommand};
 
 use config::{Overrides, Power, Settings};
 

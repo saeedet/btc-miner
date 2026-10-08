@@ -78,11 +78,7 @@ pub(crate) unsafe fn compress_block(state: &mut [u32; 8], block: &[u8; 64]) {
             // The last four groups read words that already exist, so the final
             // twelve iterations are the only ones that produce new ones.
             if group < 12 {
-                w[i] = vsha256su1q_u32(
-                    vsha256su0q_u32(w[i], w[(i + 1) % 4]),
-                    w[(i + 2) % 4],
-                    w[(i + 3) % 4],
-                );
+                w[i] = vsha256su1q_u32(vsha256su0q_u32(w[i], w[(i + 1) % 4]), w[(i + 2) % 4], w[(i + 3) % 4]);
             }
         }
 

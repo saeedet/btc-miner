@@ -124,17 +124,13 @@ pub fn build(
     let active = ActiveJob {
         job: Job {
             job_id,
-            prev_hash: template
-                .previous_block()
-                .map_err(|error| BuildError::Template(error.to_string()))?,
+            prev_hash: template.previous_block().map_err(|error| BuildError::Template(error.to_string()))?,
             // Filled in below, once the split is known.
             coinbase_prefix: Vec::new(),
             coinbase_suffix: Vec::new(),
             merkle_branch: coinbase_branch(&txids),
             version: template.version,
-            bits: template
-                .compact_bits()
-                .map_err(|error| BuildError::Template(error.to_string()))?,
+            bits: template.compact_bits().map_err(|error| BuildError::Template(error.to_string()))?,
             time: u32::try_from(template.current_time).map_err(|_| BuildError::TimeOverflow)?,
             clean_jobs,
         },
@@ -144,22 +140,13 @@ pub fn build(
         witness_commitment,
         transactions,
         txids,
-        network_target: template
-            .target()
-            .map_err(|error| BuildError::Template(error.to_string()))?,
+        network_target: template.target().map_err(|error| BuildError::Template(error.to_string()))?,
         submit_not_before: None,
     };
 
     let (prefix, suffix) = split_coinbase(&active)?;
 
-    Ok(ActiveJob {
-        job: Job {
-            coinbase_prefix: prefix,
-            coinbase_suffix: suffix,
-            ..active.job
-        },
-        ..active
-    })
+    Ok(ActiveJob { job: Job { coinbase_prefix: prefix, coinbase_suffix: suffix, ..active.job }, ..active })
 }
 
 /// The merkle branch from the coinbase leaf to the root.
@@ -195,10 +182,7 @@ fn split_coinbase(active: &ActiveJob) -> Result<(Vec<u8>, Vec<u8>), BuildError> 
         return Err(BuildError::SentinelNotUnique(matches.len()));
     };
 
-    Ok((
-        serialised[..offset].to_vec(),
-        serialised[offset + EXTRANONCE_SIZE..].to_vec(),
-    ))
+    Ok((serialised[..offset].to_vec(), serialised[offset + EXTRANONCE_SIZE..].to_vec()))
 }
 
 /// Why a job could not be built.
@@ -227,10 +211,9 @@ impl std::fmt::Display for BuildError {
                  a block built on it would be rejected"
             ),
             Self::TimeOverflow => write!(f, "template timestamp does not fit in a u32"),
-            Self::SentinelNotUnique(count) => write!(
-                f,
-                "extranonce sentinel appeared {count} times in the coinbase, expected once"
-            ),
+            Self::SentinelNotUnique(count) => {
+                write!(f, "extranonce sentinel appeared {count} times in the coinbase, expected once")
+            }
         }
     }
 }
@@ -260,8 +243,8 @@ mod tests {
     }
 
     const PAYOUT: [u8; 22] = [
-        0x00, 0x14, 0x12, 0x7e, 0x95, 0x94, 0x2c, 0x00, 0x8b, 0xa8, 0x26, 0x13, 0xb0, 0x32, 0xba,
-        0xa8, 0x5d, 0x2a, 0x53, 0x5d, 0x41, 0x05,
+        0x00, 0x14, 0x12, 0x7e, 0x95, 0x94, 0x2c, 0x00, 0x8b, 0xa8, 0x26, 0x13, 0xb0, 0x32, 0xba, 0xa8, 0x5d,
+        0x2a, 0x53, 0x5d, 0x41, 0x05,
     ];
 
     /// The whole contract of the split: splicing an extranonce into the two

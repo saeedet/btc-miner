@@ -41,17 +41,10 @@ impl BlockBuilder {
         txids: Vec<Sha256dHash>,
     ) -> Result<Self, BlockError> {
         if transactions.len() != txids.len() {
-            return Err(BlockError::CountMismatch {
-                transactions: transactions.len(),
-                txids: txids.len(),
-            });
+            return Err(BlockError::CountMismatch { transactions: transactions.len(), txids: txids.len() });
         }
 
-        Ok(Self {
-            coinbase,
-            transactions,
-            txids,
-        })
+        Ok(Self { coinbase, transactions, txids })
     }
 
     /// The merkle root over the coinbase and every other transaction.

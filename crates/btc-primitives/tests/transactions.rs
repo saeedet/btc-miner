@@ -7,20 +7,14 @@ fn segwit_transaction() -> Transaction {
     Transaction {
         version: 2,
         inputs: vec![TxIn {
-            previous_output: OutPoint {
-                txid: Sha256dHash::hash(b"some previous transaction"),
-                vout: 0,
-            },
+            previous_output: OutPoint { txid: Sha256dHash::hash(b"some previous transaction"), vout: 0 },
             // A native SegWit spend has an empty scriptSig; the unlocking data
             // lives entirely in the witness.
             script_sig: Vec::new(),
             sequence: 0xFFFF_FFFF,
             witness: vec![vec![0x30, 0x44, 0x02], vec![0x02, 0x79, 0xBE]],
         }],
-        outputs: vec![TxOut {
-            value: 99_000,
-            script_pubkey: vec![0x00, 0x14, 0xAB, 0xCD],
-        }],
+        outputs: vec![TxOut { value: 99_000, script_pubkey: vec![0x00, 0x14, 0xAB, 0xCD] }],
         lock_time: 0,
     }
 }

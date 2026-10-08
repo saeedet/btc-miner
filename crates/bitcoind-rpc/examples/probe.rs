@@ -10,9 +10,8 @@
 use bitcoind_rpc::{Network, RpcClient};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let datadir = std::env::var("SOLO_DATADIR").unwrap_or_else(|_| {
-        format!("{}/.bitcoin-solo", std::env::var("HOME").expect("HOME is set"))
-    });
+    let datadir = std::env::var("SOLO_DATADIR")
+        .unwrap_or_else(|_| format!("{}/.bitcoin-solo", std::env::var("HOME").expect("HOME is set")));
 
     let client = RpcClient::from_datadir(std::path::Path::new(&datadir), Network::Regtest)?;
 
@@ -33,10 +32,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("txs        : {}", template.transactions.len());
     println!(
         "witness cmt: {}",
-        template
-            .default_witness_commitment
-            .as_deref()
-            .unwrap_or("(none - segwit inactive)")
+        template.default_witness_commitment.as_deref().unwrap_or("(none - segwit inactive)")
     );
 
     Ok(())

@@ -17,9 +17,8 @@ use events::Plain;
 use pool::{Options, Reported};
 
 fn main() {
-    let result = parse_args().and_then(|options| {
-        pool::run(&options, Arc::new(Plain), Arc::new(AtomicBool::new(false)))
-    });
+    let result = parse_args()
+        .and_then(|options| pool::run(&options, Arc::new(Plain), Arc::new(AtomicBool::new(false))));
 
     if let Err(error) = result {
         // Already printed by the pool itself, in its own words.
@@ -52,9 +51,7 @@ fn parse_args() -> Result<Options, pool::Error> {
             "--listen" => listen = value()?,
             "--address" => address = Some(value()?),
             "--help" | "-h" => {
-                println!(
-                    "pool [--network regtest|testnet4|mainnet] [--listen ADDR] [--address ADDR]"
-                );
+                println!("pool [--network regtest|testnet4|mainnet] [--listen ADDR] [--address ADDR]");
                 std::process::exit(0);
             }
             other => return Err(format!("unknown option {other:?}").into()),

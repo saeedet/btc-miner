@@ -51,11 +51,8 @@ pub fn mine(
     // We derive this ourselves and then check it against the node's own answer.
     // Deriving it is the point; having ground truth to check against is what
     // makes deriving it safe.
-    let wtxids: Vec<Sha256dHash> = template
-        .transactions
-        .iter()
-        .map(|tx| tx.wtxid())
-        .collect::<Result<_, _>>()?;
+    let wtxids: Vec<Sha256dHash> =
+        template.transactions.iter().map(|tx| tx.wtxid()).collect::<Result<_, _>>()?;
 
     let commitment_script = witness::commitment_script(&wtxids);
 
@@ -70,27 +67,17 @@ pub fn mine(
     }
 
     // --- 2. The coinbase ----------------------------------------------------
-    let coinbase = CoinbaseBuilder::new(
-        template.height,
-        template.coinbase_value,
-        payout_script.to_vec(),
-    )
-    .extranonce(extranonce.to_le_bytes().to_vec())
-    .tag(b"btc-miner".to_vec())
-    .witness_commitment(commitment_script)
-    .build()?;
+    let coinbase = CoinbaseBuilder::new(template.height, template.coinbase_value, payout_script.to_vec())
+        .extranonce(extranonce.to_le_bytes().to_vec())
+        .tag(b"btc-miner".to_vec())
+        .witness_commitment(commitment_script)
+        .build()?;
 
     // --- 3. The block -------------------------------------------------------
-    let raw_transactions: Vec<Vec<u8>> = template
-        .transactions
-        .iter()
-        .map(|tx| tx.raw())
-        .collect::<Result<_, _>>()?;
-    let txids: Vec<Sha256dHash> = template
-        .transactions
-        .iter()
-        .map(|tx| tx.txid())
-        .collect::<Result<_, _>>()?;
+    let raw_transactions: Vec<Vec<u8>> =
+        template.transactions.iter().map(|tx| tx.raw()).collect::<Result<_, _>>()?;
+    let txids: Vec<Sha256dHash> =
+        template.transactions.iter().map(|tx| tx.txid()).collect::<Result<_, _>>()?;
 
     let builder = BlockBuilder::new(coinbase, raw_transactions, txids)?;
 
@@ -108,17 +95,11 @@ pub fn mine(
     let result = search(&header, &target, 0..=u32::MAX);
 
     let Some(solution) = result.solution else {
-        return Ok(Outcome::Exhausted {
-            best: result.best,
-            best_zero_bits: result.best.leading_zero_bits(),
-        });
+        return Ok(Outcome::Exhausted { best: result.best, best_zero_bits: result.best.leading_zero_bits() });
     };
 
     // --- 5. Submit ----------------------------------------------------------
-    let solved = BlockHeader {
-        nonce: solution.nonce,
-        ..header
-    };
+    let solved = BlockHeader { nonce: solution.nonce, ..header };
     let raw_block = builder.serialize(&solved);
 
     match client.submit_block(&hex::encode(&raw_block))? {

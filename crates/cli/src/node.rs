@@ -61,8 +61,7 @@ fn write_conf(network: Network) -> Result<PathBuf, String> {
             std::fs::create_dir_all(parent)
                 .map_err(|error| format!("cannot create {}: {error}", parent.display()))?;
         }
-        std::fs::write(&path, wanted)
-            .map_err(|error| format!("cannot write {}: {error}", path.display()))?;
+        std::fs::write(&path, wanted).map_err(|error| format!("cannot write {}: {error}", path.display()))?;
     }
     Ok(path)
 }
@@ -161,10 +160,7 @@ pub fn start(settings: &Settings, mut waiting: impl FnMut(Duration)) -> Result<(
         waiting(started.elapsed());
         std::thread::sleep(Duration::from_secs(1));
     }
-    Err(format!(
-        "the node did not answer within ten minutes — its log is at {}",
-        settings.datadir.display()
-    ))
+    Err(format!("the node did not answer within ten minutes — its log is at {}", settings.datadir.display()))
 }
 
 /// Asks the node to shut down.
@@ -182,7 +178,10 @@ mod tests {
 
     #[test]
     fn reads_the_version_core_prints() {
-        assert_eq!(parse_version("Bitcoin Core daemon version v31.1.0 bitcoind\nCopyright..."), Some((31, 1, 0)));
+        assert_eq!(
+            parse_version("Bitcoin Core daemon version v31.1.0 bitcoind\nCopyright..."),
+            Some((31, 1, 0))
+        );
         assert_eq!(parse_version("Bitcoin Core daemon version v28.0"), Some((28, 0, 0)));
         assert_eq!(parse_version("nothing useful"), None);
     }

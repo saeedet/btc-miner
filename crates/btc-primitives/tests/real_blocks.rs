@@ -31,17 +31,12 @@ const BLOCK_100000_TXIDS: [&str; 4] = [
 /// somebody else built.
 #[test]
 fn block_100000_merkle_root_is_derived_from_its_txids() {
-    let txids: Vec<Sha256dHash> = BLOCK_100000_TXIDS
-        .iter()
-        .map(|id| Sha256dHash::from_str(id).expect("valid txid"))
-        .collect();
+    let txids: Vec<Sha256dHash> =
+        BLOCK_100000_TXIDS.iter().map(|id| Sha256dHash::from_str(id).expect("valid txid")).collect();
 
     let root = merkle::merkle_root(&txids).expect("four transactions");
 
-    assert_eq!(
-        root.to_string(),
-        "f3e94742aca4b5ef85488dc37c06c3282295ffec960994b2c0d5ac2a25a95766"
-    );
+    assert_eq!(root.to_string(), "f3e94742aca4b5ef85488dc37c06c3282295ffec960994b2c0d5ac2a25a95766");
 }
 
 /// The merkle branch must let us rebuild the same root from the coinbase alone.
@@ -50,10 +45,8 @@ fn block_100000_merkle_root_is_derived_from_its_txids() {
 /// Phase 4 protocol split has the primitive it needs.
 #[test]
 fn block_100000_root_rebuilds_from_the_coinbase_branch() {
-    let txids: Vec<Sha256dHash> = BLOCK_100000_TXIDS
-        .iter()
-        .map(|id| Sha256dHash::from_str(id).expect("valid txid"))
-        .collect();
+    let txids: Vec<Sha256dHash> =
+        BLOCK_100000_TXIDS.iter().map(|id| Sha256dHash::from_str(id).expect("valid txid")).collect();
 
     let branch = merkle::coinbase_branch(&txids);
     assert_eq!(branch.len(), 2, "four leaves means a two-level tree");
@@ -69,10 +62,8 @@ fn block_100000_root_rebuilds_from_the_coinbase_branch() {
 fn block_100000_header_round_trips() {
     let header = BlockHeader {
         version: 1,
-        prev_block: Sha256dHash::from_str(
-            "000000000002d01c1fccc21636b607dfd930d31d01c3a62104612a1719011250",
-        )
-        .expect("valid hash"),
+        prev_block: Sha256dHash::from_str("000000000002d01c1fccc21636b607dfd930d31d01c3a62104612a1719011250")
+            .expect("valid hash"),
         merkle_root: Sha256dHash::from_str(
             "f3e94742aca4b5ef85488dc37c06c3282295ffec960994b2c0d5ac2a25a95766",
         )
@@ -82,10 +73,7 @@ fn block_100000_header_round_trips() {
         nonce: 274_148_111,
     };
 
-    assert_eq!(
-        header.hash().to_string(),
-        "000000000003ba27aa200b1cecaad478d2b00432346c3f1f3986da1afd33e506"
-    );
+    assert_eq!(header.hash().to_string(), "000000000003ba27aa200b1cecaad478d2b00432346c3f1f3986da1afd33e506");
 
     // The header the real network published, byte for byte.
     assert_eq!(
@@ -119,19 +107,19 @@ fn genesis_coinbase_transaction() {
         "01",                                                               // one input
         "0000000000000000000000000000000000000000000000000000000000000000", // null outpoint
         "ffffffff",
-        "4d",                                                               // 77-byte scriptSig
-        "04ffff001d0104",                                                   // difficulty + push
+        "4d",             // 77-byte scriptSig
+        "04ffff001d0104", // difficulty + push
         "455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f",
         "72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f72",
         "2062616e6b73",
-        "ffffffff",                                                         // sequence
-        "01",                                                               // one output
-        "00f2052a01000000",                                                 // 50 BTC
-        "43",                                                               // 67-byte script
+        "ffffffff",         // sequence
+        "01",               // one output
+        "00f2052a01000000", // 50 BTC
+        "43",               // 67-byte script
         "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61d",
         "eb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11",
         "d5fac",
-        "00000000",                                                         // lock time
+        "00000000", // lock time
     ));
 
     let tx = Transaction::deserialize(&raw).expect("parses");
@@ -157,10 +145,7 @@ fn genesis_coinbase_transaction() {
 
     // With no witness, both ids agree.
     assert_eq!(tx.txid(), tx.wtxid());
-    assert_eq!(
-        tx.txid().to_string(),
-        "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"
-    );
+    assert_eq!(tx.txid().to_string(), "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
 }
 
 /// The full chain of derivation for the genesis block: transaction bytes ->
@@ -191,9 +176,6 @@ fn genesis_block_derives_end_to_end() {
         nonce: 2_083_236_893,
     };
 
-    assert_eq!(
-        header.hash().to_string(),
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
-    );
+    assert_eq!(header.hash().to_string(), "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
     assert!(header.is_valid_proof_of_work().expect("valid bits"));
 }

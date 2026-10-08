@@ -16,9 +16,9 @@ use std::sync::mpsc::channel;
 use std::sync::{Arc, Condvar, Mutex};
 use std::time::Duration;
 
+use bitcoind_rpc::Network;
 use events::{Channel, Event, Plain, Sink};
 use miner::Controls;
-use bitcoind_rpc::Network;
 
 use crate::config::{Settings, network_key};
 use crate::dashboard;
@@ -55,7 +55,8 @@ pub fn run(settings: &Settings, options: &Options) -> Result<(), String> {
     let mut notes = Vec::new();
     if std::net::TcpListener::bind(settings.listen).is_err() {
         let busy = settings.listen.port();
-        let free = crate::platform::free_port_from(busy + 1).ok_or_else(|| format!("port {busy} and the next few are all in use"))?;
+        let free = crate::platform::free_port_from(busy + 1)
+            .ok_or_else(|| format!("port {busy} and the next few are all in use"))?;
         settings.listen.set_port(free);
         notes.push(format!(
             "port {busy} is in use — perhaps another copy of {} — so miners connect on {free} this time",
@@ -194,7 +195,11 @@ fn mine(
 ///
 /// The dashboard reads Ctrl-C as a key, so there this only catches signals
 /// sent from elsewhere, and stays quiet rather than print over the screen.
-fn handle_signals(stop_pool: &Arc<AtomicBool>, controls: &Arc<Controls>, announce: bool) -> Result<(), String> {
+fn handle_signals(
+    stop_pool: &Arc<AtomicBool>,
+    controls: &Arc<Controls>,
+    announce: bool,
+) -> Result<(), String> {
     let stop_pool = Arc::clone(stop_pool);
     let controls = Arc::clone(controls);
     let presses = AtomicUsize::new(0);
@@ -301,11 +306,7 @@ impl Watch {
             if give_up() {
                 return false;
             }
-            ready = self
-                .changed
-                .wait_timeout(ready, Duration::from_millis(200))
-                .expect("watch lock")
-                .0;
+            ready = self.changed.wait_timeout(ready, Duration::from_millis(200)).expect("watch lock").0;
         }
         true
     }

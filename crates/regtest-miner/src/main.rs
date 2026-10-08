@@ -40,9 +40,7 @@ fn main() {
 }
 
 fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let blocks_to_mine: u32 = std::env::args()
-        .nth(1)
-        .map_or(Ok(1), |argument| argument.parse())?;
+    let blocks_to_mine: u32 = std::env::args().nth(1).map_or(Ok(1), |argument| argument.parse())?;
 
     let datadir = datadir();
     let client = RpcClient::from_datadir(&datadir, Network::Regtest)?;
@@ -50,12 +48,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     // --- Refuse to mine on a node that is not where we think it is ----------
     let info = client.get_blockchain_info()?;
     if info.chain != Network::Regtest.as_str() {
-        return Err(format!(
-            "expected a regtest node, but {} is running {}",
-            datadir.display(),
-            info.chain
-        )
-        .into());
+        return Err(
+            format!("expected a regtest node, but {} is running {}", datadir.display(), info.chain).into()
+        );
     }
 
     println!("node   : regtest at height {}", info.blocks);
@@ -72,10 +67,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         return Err(format!("the node produced an address it considers invalid: {address}").into());
     }
     let payout_script = hex::decode(
-        address_info
-            .script_pubkey
-            .as_deref()
-            .ok_or("validateaddress returned no scriptPubKey")?,
+        address_info.script_pubkey.as_deref().ok_or("validateaddress returned no scriptPubKey")?,
     )?;
 
     println!("payout : {address}");
@@ -118,9 +110,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 /// Where the node keeps its data. Matches `scripts/node.sh`.
 fn datadir() -> PathBuf {
     std::env::var("SOLO_DATADIR").map_or_else(
-        |_| {
-            PathBuf::from(std::env::var("HOME").expect("HOME is set")).join(".bitcoin-solo")
-        },
+        |_| PathBuf::from(std::env::var("HOME").expect("HOME is set")).join(".bitcoin-solo"),
         PathBuf::from,
     )
 }

@@ -98,10 +98,7 @@ fn reference_alone_reproduces_genesis() {
     let mut hash = sha256d::reference::sha256d(&header);
     hash.reverse();
 
-    assert_eq!(
-        common::to_hex(&hash),
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
-    );
+    assert_eq!(common::to_hex(&hash), "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
 }
 
 /// The hardware path must actually be the one being used on this machine.
@@ -111,8 +108,5 @@ fn reference_alone_reproduces_genesis() {
 /// testing the reference implementation against itself.
 #[test]
 fn hardware_acceleration_is_actually_available() {
-    assert!(
-        sha256d::neon::is_available(),
-        "expected ARMv8 sha2 extensions on this CPU"
-    );
+    assert!(sha256d::neon::is_available(), "expected ARMv8 sha2 extensions on this CPU");
 }

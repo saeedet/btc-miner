@@ -12,8 +12,8 @@
 //! thread says "stop what you are doing", without any lock being held across
 //! the hashing itself.
 
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use btc_primitives::Target;
 use stratum::Job;
@@ -49,11 +49,7 @@ pub struct WorkState {
 impl WorkState {
     /// Creates empty state.
     pub fn new() -> Self {
-        Self {
-            current: Mutex::new(None),
-            generation: AtomicU64::new(0),
-            solved: AtomicU64::new(u64::MAX),
-        }
+        Self { current: Mutex::new(None), generation: AtomicU64::new(0), solved: AtomicU64::new(u64::MAX) }
     }
 
     /// Replaces the current work and signals the hashing loop to restart.

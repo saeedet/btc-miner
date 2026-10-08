@@ -15,7 +15,11 @@ use crate::{node, platform};
 /// Offers to install Bitcoin Core, or to update the one found (`found`).
 ///
 /// On success, the node software at `settings.binaries` is ready to start.
-pub fn offer(wizard: &mut Wizard, settings: &mut Settings, found: Option<(u32, u32, u32)>) -> Result<Answer<()>, String> {
+pub fn offer(
+    wizard: &mut Wizard,
+    settings: &mut Settings,
+    found: Option<(u32, u32, u32)>,
+) -> Result<Answer<()>, String> {
     let intro = match found {
         None => vec![Part::Text(
             "The node is the program that talks to the Bitcoin network and checks every block for \
@@ -71,14 +75,20 @@ fn capitalised(word: &str) -> String {
 }
 
 fn has_homebrew() -> bool {
-    Command::new("brew").arg("--version").stdout(Stdio::null()).stderr(Stdio::null()).status().is_ok_and(|status| status.success())
+    Command::new("brew")
+        .arg("--version")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|status| status.success())
 }
 
 /// Runs `brew <verb> bitcoin`, showing its latest line of output as it goes.
 fn brew(wizard: &mut Wizard, settings: &mut Settings, verb: &str) -> Result<Answer<()>, String> {
     let log = platform::state_dir().join("brew.log");
     std::fs::create_dir_all(platform::state_dir()).map_err(|error| error.to_string())?;
-    let output = std::fs::File::create(&log).map_err(|error| format!("cannot write {}: {error}", log.display()))?;
+    let output =
+        std::fs::File::create(&log).map_err(|error| format!("cannot write {}: {error}", log.display()))?;
     let errors = output.try_clone().map_err(|error| error.to_string())?;
     let mut child = Command::new("brew")
         .args([verb, "bitcoin"])
@@ -96,7 +106,10 @@ fn brew(wizard: &mut Wizard, settings: &mut Settings, verb: &str) -> Result<Answ
             return Ok(None);
         }
         Ok(Some(vec![
-            Part::Text(format!("Homebrew is {verb}ing Bitcoin Core… {} so far.", format::duration(started.elapsed().as_secs_f64()))),
+            Part::Text(format!(
+                "Homebrew is {verb}ing Bitcoin Core… {} so far.",
+                format::duration(started.elapsed().as_secs_f64())
+            )),
             Part::Gap,
             Part::Text(last_line(&log)),
         ]))
@@ -105,13 +118,20 @@ fn brew(wizard: &mut Wizard, settings: &mut Settings, verb: &str) -> Result<Answ
         return Ok(Answer::Quit);
     }
     if !status.is_some_and(|status| status.success()) {
-        return Err(format!("Homebrew could not {verb} Bitcoin Core: {} (the full output is in {})", last_line(&log), log.display()));
+        return Err(format!(
+            "Homebrew could not {verb} Bitcoin Core: {} (the full output is in {})",
+            last_line(&log),
+            log.display()
+        ));
     }
 
     settings.binaries = platform::default_node_binaries();
     let version = node::installed_version(settings)?;
     if version < node::MIN_VERSION {
-        return Err(format!("Homebrew installed Bitcoin Core {}, still too old", node::version_string(version)));
+        return Err(format!(
+            "Homebrew installed Bitcoin Core {}, still too old",
+            node::version_string(version)
+        ));
     }
     Ok(Answer::Given(()))
 }

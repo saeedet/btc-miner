@@ -13,10 +13,8 @@ use stratum::{Job, Share};
 fn sample_job() -> Job {
     Job {
         job_id: "0f1e".to_owned(),
-        prev_hash: Sha256dHash::from_str(
-            "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
-        )
-        .expect("valid"),
+        prev_hash: Sha256dHash::from_str("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f")
+            .expect("valid"),
         coinbase_prefix: hex::decode("01000000010000000000").expect("valid"),
         coinbase_suffix: hex::decode("ffffffff0100f2052a01").expect("valid"),
         merkle_branch: vec![Sha256dHash::hash(b"left"), Sha256dHash::hash(b"right")],
@@ -50,8 +48,7 @@ fn notify_params_have_the_documented_shape() {
     let prevhash = array[1].as_str().expect("a string");
     assert_eq!(prevhash.len(), 64);
     assert_ne!(
-        prevhash,
-        "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+        prevhash, "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
         "prevhash must not be sent in display order"
     );
 
@@ -68,10 +65,7 @@ fn coinbase_splices_the_extranonce_in_the_middle() {
     let job = sample_job();
     let coinbase = job.coinbase(&[0xAA, 0xBB], &[0xCC, 0xDD]);
 
-    assert_eq!(
-        hex::encode(&coinbase),
-        "01000000010000000000aabbccddffffffff0100f2052a01"
-    );
+    assert_eq!(hex::encode(&coinbase), "01000000010000000000aabbccddffffffff0100f2052a01");
 }
 
 /// Different extranonces must give different merkle roots — that is the entire

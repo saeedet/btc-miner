@@ -110,12 +110,7 @@ pub fn scan_file(path: &Path, key: ObfuscationKey) -> std::io::Result<FileScan> 
         key.apply(&mut header_bytes, offset + 8);
 
         let header = BlockHeader::deserialize(&header_bytes);
-        records.push(BlockRecord {
-            offset,
-            size,
-            hash: header.hash(),
-            previous: header.prev_block,
-        });
+        records.push(BlockRecord { offset, size, hash: header.hash(), previous: header.prev_block });
 
         // Skip the transactions; only the header was needed.
         offset += 8 + u64::from(size);
@@ -162,10 +157,8 @@ pub fn summarise(records: &[BlockRecord]) -> ChainSummary {
         children.entry(record.previous).or_insert(record.hash);
     }
 
-    let orphan_roots = records
-        .iter()
-        .filter(|record| record.hash != genesis && !present.contains(&record.previous))
-        .count();
+    let orphan_roots =
+        records.iter().filter(|record| record.hash != genesis && !present.contains(&record.previous)).count();
 
     let has_genesis = present.contains(&genesis);
     if !has_genesis {

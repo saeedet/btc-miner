@@ -95,8 +95,7 @@ pub fn run(options: &Options, sink: Arc<dyn Sink>, stop: Arc<AtomicBool>) -> Res
     // whether the node finished syncing: that answer is latched to false and
     // never revisited, so a node that later loses every peer still claims to be
     // caught up. See the `readiness` module.
-    let Some((info, peers)) = wait_until_ready(&client, options.network, sink.as_ref(), &stop)?
-    else {
+    let Some((info, peers)) = wait_until_ready(&client, options.network, sink.as_ref(), &stop)? else {
         return Ok(());
     };
 
@@ -132,15 +131,7 @@ pub fn run(options: &Options, sink: Arc<dyn Sink>, stop: Arc<AtomicBool>) -> Res
         let stop = Arc::clone(&stop);
         let network = options.network;
         std::thread::spawn(move || {
-            poll_templates(
-                &state,
-                &client,
-                &payout_script,
-                &wakeups,
-                network,
-                sink.as_ref(),
-                &stop,
-            )
+            poll_templates(&state, &client, &payout_script, &wakeups, network, sink.as_ref(), &stop)
         })
     };
 
@@ -311,11 +302,9 @@ fn poll_templates(
                             // timestamp ourselves reaches minimum difficulty
                             // instead — see the `min_difficulty` module.
                             if exploit_min_difficulty
-                                && let Ok(parent) =
-                                    client.get_block_header(&template.previous_block_hash)
-                                && let Ok(target) = btc_primitives::Target::from_compact(
-                                    min_difficulty::MIN_DIFFICULTY_BITS,
-                                )
+                                && let Ok(parent) = client.get_block_header(&template.previous_block_hash)
+                                && let Ok(target) =
+                                    btc_primitives::Target::from_compact(min_difficulty::MIN_DIFFICULTY_BITS)
                             {
                                 let window = min_difficulty::plan(parent.time);
                                 let wait = window.seconds_until_open(unix_now());
@@ -361,8 +350,7 @@ fn poll_templates(
                                 });
                             }
 
-                            let notify =
-                                Request::notification(method::NOTIFY, job.job.to_notify_params());
+                            let notify = Request::notification(method::NOTIFY, job.job.to_notify_params());
                             if let Ok(line) = serde_json::to_string(&notify) {
                                 state.broadcast(&line);
                             }
@@ -490,8 +478,7 @@ fn recheck_readiness(
     }
     *last_check = std::time::Instant::now();
 
-    let (Ok(info), Ok(peers)) = (client.get_blockchain_info(), client.get_connection_count())
-    else {
+    let (Ok(info), Ok(peers)) = (client.get_blockchain_info(), client.get_connection_count()) else {
         // A failure to ask is not a failure of the node; the template-outage
         // timer is what handles an unreachable one.
         warn(sink, "cannot re-check node readiness".to_owned());
@@ -528,12 +515,9 @@ fn recheck_readiness(
     Ok(())
 }
 
-
 /// Seconds since the Unix epoch.
 fn unix_now() -> i64 {
-    std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_or(0, |d| d.as_secs() as i64)
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_secs() as i64)
 }
 
 /// Works out where block rewards should go: the address and its script.
@@ -570,11 +554,8 @@ fn resolve_payout_script(client: &RpcClient, options: &Options) -> Result<(Strin
         .into());
     }
 
-    let script = hex::decode(
-        info.script_pubkey
-            .as_deref()
-            .ok_or("validateaddress returned no scriptPubKey")?,
-    )?;
+    let script =
+        hex::decode(info.script_pubkey.as_deref().ok_or("validateaddress returned no scriptPubKey")?)?;
     Ok((address, script))
 }
 

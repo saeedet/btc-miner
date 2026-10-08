@@ -8,10 +8,7 @@ use std::str::FromStr;
 fn genesis_bits_decode_to_difficulty_one() {
     let target = Target::from_compact(0x1d00_ffff).expect("valid");
 
-    assert_eq!(
-        target.to_string(),
-        "00000000ffff0000000000000000000000000000000000000000000000000000"
-    );
+    assert_eq!(target.to_string(), "00000000ffff0000000000000000000000000000000000000000000000000000");
     assert_eq!(target, Target::DIFFICULTY_ONE);
     assert!((Target::difficulty(0x1d00_ffff) - 1.0).abs() < 1e-9);
 }
@@ -25,20 +22,14 @@ fn genesis_bits_decode_to_difficulty_one() {
 fn regtest_bits_match_what_bitcoind_reports() {
     let target = Target::from_compact(0x207f_ffff).expect("valid");
 
-    assert_eq!(
-        target.to_string(),
-        "7fffff0000000000000000000000000000000000000000000000000000000000"
-    );
+    assert_eq!(target.to_string(), "7fffff0000000000000000000000000000000000000000000000000000000000");
 }
 
 /// Block 100000's difficulty, as recorded in the chain.
 #[test]
 fn block_100000_difficulty() {
     let difficulty = Target::difficulty(0x1b04_864c);
-    assert!(
-        (difficulty - 14_484.162_361_225_4).abs() < 0.001,
-        "got {difficulty}"
-    );
+    assert!((difficulty - 14_484.162_361_225_4).abs() < 0.001, "got {difficulty}");
 }
 
 /// The sign bit is meaningless for a target and must be rejected.
@@ -78,9 +69,8 @@ fn target_comparison_is_inclusive_at_the_boundary() {
 /// The genesis block really does meet its own target, and by a wide margin.
 #[test]
 fn genesis_hash_beats_its_target() {
-    let hash =
-        Sha256dHash::from_str("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f")
-            .expect("valid");
+    let hash = Sha256dHash::from_str("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f")
+        .expect("valid");
 
     assert!(Target::from_compact(0x1d00_ffff).expect("valid").is_met_by(&hash));
 
