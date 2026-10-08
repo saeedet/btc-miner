@@ -18,27 +18,9 @@ for the BIP-110 fork.
 > earnings. Run it because it's interesting to watch your own computer take part
 > in Bitcoin, not to earn.
 
-```
-╭─ btc-miner ───────────────────────────────── MAINNET · 14:23 UTC · up 2h14m ─╮
-│  NODE  ● in sync · block 970,412 · 12 peers · Core 31.1.0 · 5.4 GB           │
-├─ MINING ─────────────────────────────────────────────────────────────────────┤
-│   26.1 MH/s  ████████████████████████████████████  last 10 min               │
-│   power  ● balanced (6 of 8 cores)         job: block 970,413 · 3,812 txs    │
-├─ YOUR CHANCES ───────────────────────────────────────────────────────────────┤
-│   This session    about 1 in 2.7 trillion of finding a block                 │
-│   On average      one block every ≈ 678 million years at this speed          │
-│   Best hash yet   41 of the 78 zero bits needed                              │
-│                   (each missing bit doubles it: 2³⁷ ≈ 137 billion× short)    │
-├─ ALL TIME ───────────────────────────────────────────────────────────────────┤
-│   3.04T hashes · 12 sessions · best ever 45 zero bits                        │
-│   rewards to bc1qw508…f3t4 · spendable about 17 hours after a block is found │
-├─ RECENT ─────────────────────────────────────────────────────────────────────┤
-│   14:22  someone else found block 970,412 → new job, nothing lost            │
-│   14:15  someone else found block 970,411 → new job, nothing lost            │
-╰─ q quit · p pause · +/- power · ? what am I looking at ──────────────────────╯
-```
+![The live dashboard, mining Bitcoin mainnet](docs/images/dashboard.png)
 
-*The live dashboard. The numbers here are illustrative.*
+*The live dashboard, mining Bitcoin mainnet on an 8-core M3 Mac. The reward address is hidden.*
 
 ## What you need
 
