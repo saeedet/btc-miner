@@ -97,10 +97,10 @@ pub unsafe fn sha256(message: &[u8]) -> [u8; 32] {
     let padded = pad(message);
     let mut state = H0;
 
-    for block in padded.chunks_exact(64) {
-        // SAFETY: the caller guarantees `sha2` is available, and `chunks_exact`
-        // yields slices of exactly 64 bytes.
-        unsafe { compress_block(&mut state, block.try_into().expect("chunks_exact(64)")) };
+    // Padding always makes a whole number of 64-byte blocks.
+    for block in padded.as_chunks::<64>().0 {
+        // SAFETY: the caller guarantees `sha2` is available.
+        unsafe { compress_block(&mut state, block) };
     }
 
     let mut digest = [0u8; 32];

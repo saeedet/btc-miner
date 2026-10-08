@@ -44,7 +44,7 @@ use btc_primitives::Sha256dHash;
 /// Its own inverse, so the same function encodes and decodes.
 pub fn swap_words(bytes: [u8; 32]) -> [u8; 32] {
     let mut swapped = bytes;
-    for word in swapped.chunks_exact_mut(4) {
+    for word in swapped.as_chunks_mut::<4>().0 {
         word.reverse();
     }
     swapped
