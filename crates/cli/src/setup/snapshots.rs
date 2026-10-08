@@ -126,8 +126,8 @@ fn catching_up() {
                 .into(),
         ),
         Part::Gap,
-        Part::Line(Line::raw("    Catching up      ██████████████████░░░░░░░░░░   64%   about 2 hours left")),
-        Part::Line(Line::raw("                     block 944,610 of 970,412")),
+        Part::Line(Line::raw("    Catching up      ██████████████████░░░░░░░░░░   64%")),
+        Part::Line(Line::raw("                     block 944,610 of 970,412 · about 2 hours left")),
         Part::Gap,
         Part::Text("⏵ Mining starts on its own when this reaches 100%.".into()),
     ];
